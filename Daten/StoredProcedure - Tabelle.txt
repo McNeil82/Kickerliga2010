@@ -1,0 +1,7 @@
+SELECT Spieler.ID, Spieler.Kuerzel, Sum(1) AS Spiele, Sum(IIf(Spieler.ID=Paarungen.HeimSpielerID1 Or Spieler.ID=Paarungen.HeimSpielerID2,Ergebnisse.HomeGoals,Ergebnisse.AwayGoals)) AS Tore, Sum(IIf(Spieler.ID=Paarungen.AuswaertsSpielerID1 Or Spieler.ID=Paarungen.AuswaertsSpielerID2,Ergebnisse.HomeGoals,Ergebnisse.AwayGoals)) AS Gegentore, Tore-Gegentore AS Differenz, Sum(IIf(((Spieler.ID=Paarungen.HeimSpielerID1 Or Spieler.ID=Paarungen.HeimSpielerID2) And Ergebnisse.HomeGoals>Ergebnisse.AwayGoals) Or ((Spieler.ID=Paarungen.AuswaertsSpielerID1 Or Spieler.ID=Paarungen.AuswaertsSpielerID2) And Ergebnisse.AwayGoals>Ergebnisse.HomeGoals),1,0)) AS Punkte
+FROM Spieler INNER JOIN (Ergebnisse INNER JOIN Paarungen ON Ergebnisse.ID = Paarungen.ErgebnisID) ON (Spieler.ID = Paarungen.AuswaertsSpielerID2) or (Spieler.ID = Paarungen.AuswaertsSpielerID1) or (Spieler.ID = Paarungen.HeimSpielerID2) or (Spieler.ID = Paarungen.HeimSpielerID1)
+GROUP BY Spieler.ID, Spieler.Kuerzel
+UNION SELECT Spieler.ID, Spieler.Kuerzel,0,0,0,0,0
+FROM Spieler
+WHERE Spieler.ID Not In (SELECT DISTINCT Spieler.ID
+FROM Spieler INNER JOIN (Ergebnisse INNER JOIN Paarungen ON Ergebnisse.ID = Paarungen.ErgebnisID) ON (Spieler.ID = Paarungen.AuswaertsSpielerID2) or (Spieler.ID = Paarungen.AuswaertsSpielerID1) or (Spieler.ID = Paarungen.HeimSpielerID2) or (Spieler.ID = Paarungen.HeimSpielerID1));
